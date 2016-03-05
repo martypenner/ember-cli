@@ -3,11 +3,11 @@
 'use strict';
 
 var Promise          = require('../../lib/ext/promise');
-var assertFile       = require('../helpers/assert-file');
-var assertFileEquals = require('../helpers/assert-file-equals');
-var conf             = require('../helpers/conf');
+var assertFile       = require('ember-cli-internal-test-helpers/lib/helpers/assert-file');
+var assertFileEquals = require('ember-cli-internal-test-helpers/lib/helpers/assert-file-equals');
+var conf             = require('ember-cli-internal-test-helpers/lib/helpers/conf');
 var ember            = require('../helpers/ember');
-var replaceFile      = require('../helpers/file-utils').replaceFile;
+var replaceFile      = require('ember-cli-internal-test-helpers/lib/helpers/file-utils').replaceFile;
 var fs               = require('fs-extra');
 var outputFile       = Promise.denodeify(fs.outputFile);
 var path             = require('path');
@@ -17,7 +17,8 @@ var tmproot          = path.join(root, 'tmp');
 var expect           = require('chai').expect;
 var mkTmpDirIn       = require('../../lib/utilities/mk-tmp-dir-in');
 
-var BlueprintNpmTask = require('../helpers/disable-npm-on-blueprint');
+var Blueprint        = require('../../lib/models/blueprint');
+var BlueprintNpmTask = require('ember-cli-internal-test-helpers/lib/helpers/disable-npm-on-blueprint');
 
 describe('Acceptance: ember generate pod', function() {
   this.timeout(20000);
@@ -25,12 +26,12 @@ describe('Acceptance: ember generate pod', function() {
   var tmpdir;
 
   before(function() {
-    BlueprintNpmTask.disableNPM();
+    BlueprintNpmTask.disableNPM(Blueprint);
     conf.setup();
   });
 
   after(function() {
-    BlueprintNpmTask.restoreNPM();
+    BlueprintNpmTask.restoreNPM(Blueprint);
     conf.restore();
   });
 
@@ -882,7 +883,7 @@ describe('Acceptance: ember generate pod', function() {
             '});'
           ]
         });
-    });
+      });
   });
 
   it('route foo --pod with --reset-namespace', function() {
@@ -1184,7 +1185,7 @@ describe('Acceptance: ember generate pod', function() {
                   "\n"+
                   "export default {\n" +
                   "  name: 'foo',\n" +
-                  "  initialize: initialize\n" +
+                  "  initialize\n" +
                   "};"
       });
     });
@@ -1199,7 +1200,7 @@ describe('Acceptance: ember generate pod', function() {
                   "\n"+
                   "export default {\n" +
                   "  name: 'foo/bar',\n" +
-                  "  initialize: initialize\n" +
+                  "  initialize\n" +
                   "};"
       });
     });
@@ -1322,17 +1323,17 @@ describe('Acceptance: ember generate pod', function() {
 
   it('adapter application cannot extend from --base-class=application', function() {
     return generate(['adapter', 'application', '--base-class=application', '--pod']).then(function() {
-      expect(false);
+      expect(false).to.be.ok;
     }, function(err) {
-      expect(err.message).to.match(/Adapters cannot extend from themself/);
+      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
     });
   });
 
   it('adapter foo cannot extend from --base-class=foo', function() {
     return generate(['adapter', 'foo', '--base-class=foo', '--pod']).then(function() {
-      expect(false);
+      expect(false).to.be.ok;
     }, function(err) {
-      expect(err.message).to.match(/Adapters cannot extend from themself/);
+      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
     });
   });
 

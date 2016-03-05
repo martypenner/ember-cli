@@ -4,7 +4,7 @@ var path          = require('path');
 var testInfo      = require('ember-cli-test-info');
 var stringUtil    = require('ember-cli-string-utils');
 var isPackageMissing = require('ember-cli-is-package-missing');
-var getPathOption = require('../../lib/utilities/get-component-path-option');
+var getPathOption = require('ember-cli-get-component-path-option');
 
 module.exports = {
   description: 'Generates a component integration or unit test.',
@@ -39,15 +39,15 @@ module.exports = {
   locals: function(options) {
     var dasherizedModuleName = stringUtil.dasherize(options.entity.name);
     var componentPathName = dasherizedModuleName;
-    var testType = options.testType || "integration";
-    var friendlyTestDescription = testInfo.description(options.entity.name, "Integration", "Component");
+    var testType = options.testType || 'integration';
+    var friendlyTestDescription = testInfo.description(options.entity.name, 'Integration', 'Component');
 
     if (options.pod && options.path !== 'components' && options.path !== '') {
       componentPathName = [options.path, dasherizedModuleName].join('/');
     }
 
     if (options.testType === 'unit') {
-      friendlyTestDescription = testInfo.description(options.entity.name, "Unit", "Component");
+      friendlyTestDescription = testInfo.description(options.entity.name, 'Unit', 'Component');
     }
 
     return {

@@ -7,10 +7,10 @@ var existsSync = require('exists-sync');
 var glob       = require('glob');
 var Blueprint  = require('../../lib/models/blueprint');
 var path       = require('path');
-var tmp        = require('../helpers/tmp');
+var tmp        = require('ember-cli-internal-test-helpers/lib/helpers/tmp');
 var root       = process.cwd();
 var util       = require('util');
-var conf       = require('../helpers/conf');
+var conf       = require('ember-cli-internal-test-helpers/lib/helpers/conf');
 var minimatch  = require('minimatch');
 var intersect  = require('lodash/intersection');
 var remove     = require('lodash/remove');
@@ -78,11 +78,11 @@ describe('Acceptance: ember init', function() {
 
   function pickSync(filePath, pattern) {
     return glob.sync(path.join('**', pattern), {
-        cwd: filePath,
-        dot: true,
-        mark: true,
-        strict: true
-      }).sort();
+      cwd: filePath,
+      dot: true,
+      mark: true,
+      strict: true
+    }).sort();
   }
   function removeIgnored(array) {
     remove(array, function(fn) {
@@ -231,7 +231,7 @@ describe('Acceptance: ember init', function() {
       '--skip-bower'
     ])
     .then(function() {
-      expect(!existsSync('.git'));
+      expect(existsSync('.git')).to.be.false;
     });
   });
 

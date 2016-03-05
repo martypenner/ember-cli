@@ -17,12 +17,15 @@ install:
   # Get the latest stable version of Node 0.STABLE.latest
   - ps: Install-Product node $env:nodejs_version
   # Install PhantomJS
-  - cinst PhantomJS -y
+  - npm install phantomjs-prebuilt
   # Typical npm stuff.
-  - md C:\nc
-  - npm config set cache C:\nc
   - npm version
   - npm install
+
+cache:
+  - '%APPDATA%\npm-cache'
+  - '%APPDATA%\Roaming\bower'
+
 
 # Post-install test scripts.
 test_script:

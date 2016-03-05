@@ -293,7 +293,7 @@ describe('models/project.js', function() {
 
       project.discoverAddons();
 
-      expect(added);
+      expect(added).to.be.ok;
     });
   });
 
@@ -321,11 +321,11 @@ describe('models/project.js', function() {
     });
 
     it('reloads the package', function() {
-      expect(Project.prototype.reloadPkg.called, 'reloadPkg was called');
+      expect(Project.prototype.reloadPkg.called, 'reloadPkg was called').to.be.ok;
     });
 
     it('initializes the addons', function() {
-      expect(Project.prototype.initializeAddons.called, 'initialize addons was called');
+      expect(Project.prototype.initializeAddons.called, 'initialize addons was called').to.be.ok;
     });
   });
 
@@ -435,7 +435,7 @@ describe('models/project.js', function() {
 
     it('should call initialize addons', function() {
       project.findAddonByName('foo');
-      expect(project.initializeAddons.called, 'should have called initializeAddons');
+      expect(project.initializeAddons.called, 'should have called initializeAddons').to.be.ok;
     });
 
     it('should return the foo addon from name', function() {
@@ -523,6 +523,18 @@ describe('models/project.js', function() {
   describe('.nullProject', function (){
     it('is a singleton', function() {
       expect(Project.nullProject()).to.equal(Project.nullProject());
+    });
+  });
+
+  describe('generateTestFile()', function (){
+    it('returns empty file and shows warning', function() {
+      var ui = new MockUI();
+
+      projectPath = path.resolve(__dirname, '../../fixtures/project');
+      project = new Project(projectPath, {}, ui);
+
+      expect(project.generateTestFile()).to.equal('');
+      expect(ui.output).to.contain('Please install an Ember.js test framework addon or update your dependencies.');
     });
   });
 });

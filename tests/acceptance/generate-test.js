@@ -3,18 +3,19 @@
 'use strict';
 
 var Promise          = require('../../lib/ext/promise');
-var assertFile       = require('../helpers/assert-file');
-var assertFileEquals = require('../helpers/assert-file-equals');
-var conf             = require('../helpers/conf');
+var assertFile       = require('ember-cli-internal-test-helpers/lib/helpers/assert-file');
+var assertFileEquals = require('ember-cli-internal-test-helpers/lib/helpers/assert-file-equals');
+var conf             = require('ember-cli-internal-test-helpers/lib/helpers/conf');
 var ember            = require('../helpers/ember');
 var fs               = require('fs-extra');
 var outputFile       = Promise.denodeify(fs.outputFile);
 var path             = require('path');
 var remove           = Promise.denodeify(fs.remove);
-var replaceFile      = require('../helpers/file-utils').replaceFile;
+var replaceFile      = require('ember-cli-internal-test-helpers/lib/helpers/file-utils').replaceFile;
 var root             = process.cwd();
 var tmproot          = path.join(root, 'tmp');
-var BlueprintNpmTask = require('../helpers/disable-npm-on-blueprint');
+var Blueprint        = require('../../lib/models/blueprint');
+var BlueprintNpmTask = require('ember-cli-internal-test-helpers/lib/helpers/disable-npm-on-blueprint');
 var expect           = require('chai').expect;
 var MockUI             = require('../helpers/mock-ui');
 var mkTmpDirIn       = require('../../lib/utilities/mk-tmp-dir-in');
@@ -25,12 +26,12 @@ describe('Acceptance: ember generate', function() {
   var tmpdir;
 
   before(function() {
-    BlueprintNpmTask.disableNPM();
+    BlueprintNpmTask.disableNPM(Blueprint);
     conf.setup();
   });
 
   after(function() {
-    BlueprintNpmTask.restoreNPM();
+    BlueprintNpmTask.restoreNPM(Blueprint);
     conf.restore();
   });
 
@@ -359,7 +360,7 @@ describe('Acceptance: ember generate', function() {
     });
   });
 
-    it('route foo with --skip-router', function() {
+  it('route foo with --skip-router', function() {
     return generate(['route', 'foo', '--skip-router']).then(function() {
       assertFile('app/router.js', {
         doesNotContain: 'this.route(\'foo\')'
@@ -522,16 +523,11 @@ describe('Acceptance: ember generate', function() {
   });
 
   it('resource without entity name does not throw exception', function() {
-
-    var restoreWriteError = MockUI.prototype.writeError;
-    MockUI.prototype.writeError = function(error) {
-      expect(error.message).to.equal('The `ember generate <entity-name>` command requires an entity name to be specified. For more details, use `ember help`.');
-    };
-
     return generate(['resource']).then(function() {
-      MockUI.prototype.writeError = restoreWriteError;
+      expect(false).to.be.ok;
+    }, function(err) {
+      expect(err.errorLog[0].message).to.equal('The `ember generate <entity-name>` command requires an entity name to be specified. For more details, use `ember help`.');
     });
-
   });
 
   it('resource foos with --path', function() {
@@ -630,7 +626,7 @@ describe('Acceptance: ember generate', function() {
                   "\n"+
                   "export default {\n" +
                   "  name: 'foo',\n" +
-                  "  initialize: initialize\n" +
+                  "  initialize\n" +
                   "};"
       });
 
@@ -649,7 +645,7 @@ describe('Acceptance: ember generate', function() {
                   "\n"+
                   "export default {\n" +
                   "  name: 'foo/bar',\n" +
-                  "  initialize: initialize\n" +
+                  "  initialize\n" +
                   "};"
       });
 
@@ -759,17 +755,17 @@ describe('Acceptance: ember generate', function() {
 
   it('adapter application cannot extend from --base-class=application', function() {
     return generate(['adapter', 'application', '--base-class=application']).then(function() {
-      expect(false);
+      expect(false).to.be.ok;
     }, function(err) {
-      expect(err.message).to.match(/Adapters cannot extend from themself/);
+      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
     });
   });
 
   it('adapter foo cannot extend from --base-class=foo', function() {
     return generate(['adapter', 'foo', '--base-class=foo']).then(function() {
-      expect(false);
+      expect(false).to.be.ok;
     }, function(err) {
-      expect(err.message).to.match(/Adapters cannot extend from themself/);
+      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
     });
   });
 
@@ -1335,33 +1331,30 @@ describe('Acceptance: ember generate', function() {
   });
 
   it('custom blueprint availableOptions', function() {
-    return initApp()
-      .then(function() {
-        return ember(['generate', 'blueprint', 'foo'])
-          .then(function() {
-            replaceFile('blueprints/foo/index.js', 'module.exports = {',
-              'module.exports = {\navailableOptions: [ \n' +
-              '{ name: \'foo\',\ntype: String, \n' +
-              'values: [\'one\', \'two\'],\n' +
-              'default: \'one\',\n' +
-              'aliases: [ {\'one\': \'one\'}, {\'two\': \'two\'} ] } ],\n' +
-              'locals: function(options) {\n' +
-              'return { foo: options.foo };\n' +
-              '},');
-            return outputFile(
-              'blueprints/foo/files/app/foos/__name__.js',
-              "import Ember from 'ember';\n" +
-              'export default Ember.Object.extend({ foo: <%= foo %> });\n'
-            )
-              .then(function() {
-                return ember(['generate','foo','bar','-two']);
-              });
-      });
-    })
-      .then(function() {
-        assertFile('app/foos/bar.js', {
-          contain: ['export default Ember.Object.extend({ foo: two });']
+    return initApp().then(function() {
+      return ember(['generate', 'blueprint', 'foo']).then(function() {
+        replaceFile('blueprints/foo/index.js', 'module.exports = {',
+          'module.exports = {\navailableOptions: [ \n' +
+          '{ name: \'foo\',\ntype: String, \n' +
+          'values: [\'one\', \'two\'],\n' +
+          'default: \'one\',\n' +
+          'aliases: [ {\'one\': \'one\'}, {\'two\': \'two\'} ] } ],\n' +
+          'locals: function(options) {\n' +
+          'return { foo: options.foo };\n' +
+          '},');
+
+        return outputFile(
+          'blueprints/foo/files/app/foos/__name__.js',
+          "import Ember from 'ember';\n" +
+          'export default Ember.Object.extend({ foo: <%= foo %> });\n'
+        ).then(function() {
+          return ember(['generate','foo','bar','-two']);
         });
       });
+    }).then(function() {
+      assertFile('app/foos/bar.js', {
+        contain: ['export default Ember.Object.extend({ foo: two });']
+      });
+    });
   });
 });

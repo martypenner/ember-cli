@@ -262,7 +262,7 @@ describe('broccoli/ember-app', function() {
                            'content="' + escapedConfig + '" />';
         var actual = emberApp.contentFor(config, defaultMatch, 'head');
 
-        expect(true, actual.indexOf(metaExpected) > -1);
+        expect(actual.indexOf(metaExpected)).to.be.above(-1);
       });
 
       it('does not include the `meta` tag in `head` if storeConfigInMeta is false', function() {
@@ -273,7 +273,7 @@ describe('broccoli/ember-app', function() {
                            'content="' + escapedConfig + '" />';
         var actual = emberApp.contentFor(config, defaultMatch, 'head');
 
-        expect(true, actual.indexOf(metaExpected) === -1);
+        expect(actual.indexOf(metaExpected)).to.equal(-1);
       });
 
       it('includes the `base` tag in `head` if locationType is auto', function() {
@@ -282,7 +282,7 @@ describe('broccoli/ember-app', function() {
         var expected = '<base href="/" />';
         var actual = emberApp.contentFor(config, defaultMatch, 'head');
 
-        expect(true, actual.indexOf(expected) > -1);
+        expect(actual.indexOf(expected)).to.be.above(-1);
       });
 
       it('includes the `base` tag in `head` if locationType is none (testem requirement)', function() {
@@ -291,7 +291,7 @@ describe('broccoli/ember-app', function() {
         var expected = '<base href="/" />';
         var actual = emberApp.contentFor(config, defaultMatch, 'head');
 
-        expect(true, actual.indexOf(expected) > -1);
+        expect(actual.indexOf(expected)).to.be.above(-1);
       });
 
       it('does not include the `base` tag in `head` if locationType is hash', function() {
@@ -300,7 +300,7 @@ describe('broccoli/ember-app', function() {
         var expected = '<base href="/foo/bar/" />';
         var actual = emberApp.contentFor(config, defaultMatch, 'head');
 
-        expect(true, actual.indexOf(expected) === -1);
+        expect(actual.indexOf(expected)).to.equal(-1);
       });
     });
 
@@ -311,7 +311,7 @@ describe('broccoli/ember-app', function() {
 
         var actual = emberApp.contentFor(config, defaultMatch, 'config-module');
 
-        expect(true, actual.indexOf(expected) > -1);
+        expect(actual.indexOf(expected)).to.be.above(-1);
       });
 
       it('includes the raw config if storeConfigInMeta is false', function() {
@@ -320,7 +320,7 @@ describe('broccoli/ember-app', function() {
         var expected = JSON.stringify(config);
         var actual = emberApp.contentFor(config, defaultMatch, 'config-module');
 
-        expect(true, actual.indexOf(expected) > -1);
+        expect(actual.indexOf(expected)).to.be.above(-1);
       });
     });
 
@@ -350,7 +350,7 @@ describe('broccoli/ember-app', function() {
           project: project
         });
 
-        expect(true, called);
+        expect(called).to.be.true;
         expect(passedApp).to.equal(emberApp);
       });
 
@@ -444,45 +444,45 @@ describe('broccoli/ember-app', function() {
       });
     });
     describe('postprocessTree is called properly', function() {
-        var postprocessTreeStub;
-        beforeEach(function() {
-          emberApp = new EmberApp({
-            project: project
-          });
-
-          postprocessTreeStub = stub(emberApp, 'addonPostprocessTree', ['batman']);
+      var postprocessTreeStub;
+      beforeEach(function() {
+        emberApp = new EmberApp({
+          project: project
         });
 
-
-        it('styles calls addonTreesFor', function() {
-          emberApp.styles();
-
-          expect(postprocessTreeStub.calledWith[0][0]).to.equal('css');
-          expect(postprocessTreeStub.calledWith[0][1].description).to.equal('styles', 'should be called with consolidated tree');
-        });
+        postprocessTreeStub = stub(emberApp, 'addonPostprocessTree', ['batman']);
+      });
 
 
-        it('template type is called', function() {
-          var oldLoad = emberApp.registry.load;
-          emberApp.registry.load = function(type) {
-            if (type === 'template'){
-              return [
-                {
-                  toTree: function() {
-                    return {
-                      description: 'template'
-                    };
-                  }
-                }];
-            } else {
-              return oldLoad.call(emberApp.registry, type);
-            }
-          };
+      it('styles calls addonTreesFor', function() {
+        emberApp.styles();
 
-          emberApp._processedTemplatesTree();
-          expect(postprocessTreeStub.calledWith[0][0]).to.equal('template');
-          expect(postprocessTreeStub.calledWith[0][1].description).to.equal('template', 'should be called with consolidated tree');
-        });
+        expect(postprocessTreeStub.calledWith[0][0]).to.equal('css');
+        expect(postprocessTreeStub.calledWith[0][1].description).to.equal('styles', 'should be called with consolidated tree');
+      });
+
+
+      it('template type is called', function() {
+        var oldLoad = emberApp.registry.load;
+        emberApp.registry.load = function(type) {
+          if (type === 'template'){
+            return [
+              {
+                toTree: function() {
+                  return {
+                    description: 'template'
+                  };
+                }
+              }];
+          } else {
+            return oldLoad.call(emberApp.registry, type);
+          }
+        };
+
+        emberApp._processedTemplatesTree();
+        expect(postprocessTreeStub.calledWith[0][0]).to.equal('template');
+        expect(postprocessTreeStub.calledWith[0][1].description).to.equal('template', 'should be called with consolidated tree');
+      });
     });
 
     describe('toTree', function() {
@@ -713,20 +713,61 @@ describe('broccoli/ember-app', function() {
   });
 
   describe('import', function() {
+    it('appends dependencies to vendor by default', function() {
+      emberApp = new EmberApp({
+        project: project
+      });
+      emberApp.import('vendor/moment.js');
+      var outputFile = emberApp._scriptOutputFiles['/assets/vendor.js'];
+
+      expect(outputFile).to.be.instanceof(Array);
+      expect(outputFile.indexOf('vendor/moment.js')).to.equal(outputFile.length - 1);
+    });
     it('appends dependencies', function() {
       emberApp = new EmberApp({
         project: project
       });
       emberApp.import('vendor/moment.js', {type: 'vendor'});
-      expect(emberApp.legacyFilesToAppend.indexOf('vendor/moment.js')).to.equal(emberApp.legacyFilesToAppend.length - 1);
+
+      var outputFile = emberApp._scriptOutputFiles['/assets/vendor.js'];
+
+      expect(outputFile).to.be.instanceof(Array);
+      expect(outputFile.indexOf('vendor/moment.js')).to.equal(outputFile.length - 1);
     });
     it('prepends dependencies', function() {
       emberApp = new EmberApp({
         project: project
       });
       emberApp.import('vendor/es5-shim.js', {type: 'vendor', prepend: true});
-      expect(emberApp.legacyFilesToAppend.indexOf('vendor/es5-shim.js')).to.equal(0);
+
+      var outputFile = emberApp._scriptOutputFiles['/assets/vendor.js'];
+
+      expect(outputFile).to.be.instanceof(Array);
+      expect(outputFile.indexOf('vendor/es5-shim.js')).to.equal(0);
     });
+    it('prepends dependencies to outputFile', function() {
+      emberApp = new EmberApp({
+        project: project
+      });
+      emberApp.import('vendor/moment.js', {outputFile: 'moment.js', prepend: true});
+
+      var outputFile = emberApp._scriptOutputFiles['moment.js'];
+
+      expect(outputFile).to.be.instanceof(Array);
+      expect(outputFile.indexOf('vendor/moment.js')).to.equal(0);
+    });
+    it('appends dependencies to outputFile', function() {
+      emberApp = new EmberApp({
+        project: project
+      });
+      emberApp.import('vendor/moment.js', {outputFile: 'moment.js'});
+
+      var outputFile = emberApp._scriptOutputFiles['moment.js'];
+
+      expect(outputFile).to.be.instanceof(Array);
+      expect(outputFile.indexOf('vendor/moment.js')).to.equal(outputFile.length - 1);
+    });
+
     it('defaults to development if production is not set', function() {
       process.env.EMBER_ENV = 'production';
       emberApp = new EmberApp({
@@ -735,9 +776,9 @@ describe('broccoli/ember-app', function() {
       emberApp.import({
         'development': 'vendor/jquery.js'
       });
-      expect(emberApp.legacyFilesToAppend.indexOf('vendor/jquery.js')).to.equal(emberApp.legacyFilesToAppend.length -1);
+      var outputFile = emberApp._scriptOutputFiles['/assets/vendor.js'];
+      expect(outputFile.indexOf('vendor/jquery.js')).to.equal(outputFile.length -1);
       process.env.EMBER_ENV = undefined;
-
     });
     it('honors explicitly set to null in environment', function() {
       process.env.EMBER_ENV = 'production';
@@ -748,7 +789,7 @@ describe('broccoli/ember-app', function() {
         'development': 'vendor/jquery.js',
         'production':  null
       });
-      expect(emberApp.legacyFilesToAppend.indexOf('vendor/jquery.js')).to.equal(-1);
+      expect(emberApp._scriptOutputFiles['/assets/vendor.js'].indexOf('vendor/jquery.js')).to.equal(-1);
       process.env.EMBER_ENV = undefined;
     });
   });
@@ -871,4 +912,6 @@ describe('broccoli/ember-app', function() {
       expect(emberFiles.development).to.equal('vendor/ember.debug.js');
     });
   });
+
 });
+

@@ -1,5 +1,8 @@
 module.exports = {
   root: true,
+  plugins: [
+    'chai-expect',
+  ],
   extends: 'eslint:recommended',
   env: {
     browser: false,
@@ -14,15 +17,12 @@ module.exports = {
       allowTernary: true,
     }],
 
-    // JSHint "proto", disabled due to warnings
-    'no-proto': 0,
-
     // JSHint "strict"
     'strict': [2, 'global'],
 
-    // JSHint "indent", disabled due to warnings
-    'indent': [0, 2, {
-      'SwitchCase': 0,
+    // JSHint "indent"
+    'indent': [2, 2, {
+      'SwitchCase': 1,
       'VariableDeclarator': { 'var': 2, 'let': 2, 'const': 3 }
     }],
 
@@ -67,8 +67,8 @@ module.exports = {
     // JSHint "noempty", JSCS "disallowEmptyBlocks"
     'no-empty': 2,
 
-    // JSHint "quotmark", disabled due to warnings
-    quotes: [0, 'single'],
+    // JSHint "quotmark"
+    quotes: [2, 'single'],
 
     // JSHint "nonew", disabled already in .jshintrc
     'no-new': 0,
@@ -82,9 +82,6 @@ module.exports = {
     // JSHint "unused"
     'no-unused-vars': 2,
 
-    // JSHint "sub", disabled due to warnings
-    'dot-notation': 0,
-
     // JSHint "trailing"
     'no-trailing-spaces': 2,
 
@@ -93,5 +90,9 @@ module.exports = {
 
     'no-console': 0,
     'comma-dangle': 0,
+
+    'chai-expect/missing-assertion': 2,
+    'chai-expect/terminating-properties': 2,
+    'chai-expect/no-inner-compare': 2,
   },
 };
