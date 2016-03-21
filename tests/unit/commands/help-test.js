@@ -455,13 +455,13 @@ Available commands from my-addon:' + EOL);
       ]);
     });
 
-    it('handles special option `path`', function() {
+    it('handles special option `Path`', function() {
       options.commands = {
         Command1: function() {
           return {
             getJson: function() {
               return {
-                test1: path
+                test1: 'Path'
               };
             }
           };
@@ -476,7 +476,7 @@ Available commands from my-addon:' + EOL);
 
       expect(json.commands).to.deep.equal([
         {
-          test1: 'path'
+          test1: 'Path'
         }
       ]);
     });
@@ -492,16 +492,7 @@ Available commands from my-addon:' + EOL);
 
       var json = convertToJson(options.ui.output);
 
-      expect(json.commands).to.deep.equal([
-        {
-          name: 'core-object',
-          description: null,
-          aliases: [],
-          works: 'insideProject',
-          availableOptions: [],
-          anonymousOptions: []
-        }
-      ]);
+      expect(json.commands).to.deep.equal([]);
     });
 
     it('respects skipHelp when listing', function() {

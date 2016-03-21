@@ -452,6 +452,7 @@ describe('Unit: CLI', function() {
 
           var options = build.calledWith[0][0];
           expect(options.watch).to.equal(false, 'expected the default watch flag to be false');
+          expect(options.suppressSizes).to.equal(false, 'expected the default supress-sizes flag to be false');
         });
       });
 
@@ -470,6 +471,15 @@ describe('Unit: CLI', function() {
         return ember([command, '--watch']).then(function() {
           var options = build.calledWith[0][0];
           expect(options.watch).to.equal(true, 'expected the watch flag to be true');
+        });
+      });
+
+      it('ember ' + command + ' --suppress-sizes', function() {
+        var build = stubRun('build');
+
+        return ember([command, '--suppress-sizes']).then(function () {
+          var options = build.calledWith[0][0];
+          expect(options.suppressSizes).to.equal(true, 'expected the suppressSizes flag to be true');
         });
       });
 
@@ -554,10 +564,11 @@ describe('Unit: CLI', function() {
     var help = stubValidateAndRun('help');
 
     return ember(['unknownCommand']).then(function() {
-      var errors = ui.errors.trim().split(EOL);
-      var helpfulMessage = /The specified command .*unknownCommand.* is invalid\. For available options/;
-      expect(errors[0]).to.match(helpfulMessage, 'expected an invalid command message');
+      expect(false).to.be.ok;
+    }).catch(function(error) {
       expect(help.called, 'help command was executed').to.not.be.ok;
+      expect(error.name).to.equal('SilentError');
+      expect(error.message).to.equal('The specified command unknownCommand is invalid. For available options, see `ember help`.');
     });
   });
 
@@ -575,6 +586,39 @@ describe('Unit: CLI', function() {
     });
   });
 
+  describe('logError', function() {
+    it('returns error status code in production', function() {
+      var cli = new CLI({
+        ui: new MockUI(),
+        testing: false
+      });
+
+      expect(cli.logError('foo')).to.equal(1);
+    });
+
+    it('does not throw an error in production', function() {
+      var cli = new CLI({
+        ui: new MockUI(),
+        testing: false
+      });
+
+      var invokeError = cli.logError.bind(cli, new Error('foo'));
+
+      expect(invokeError).to.not.throw();
+    });
+
+    it('throws error in testing', function() {
+      var cli = new CLI({
+        ui: new MockUI(),
+        testing: true
+      });
+
+      var invokeError = cli.logError.bind(cli, new Error('foo'));
+
+      expect(invokeError).to.throw(Error, 'foo');
+    });
+  });
+
   describe('Global command options', function() {
     var verboseCommand = function(args) {
       return ember(['fake-command', '--verbose'].concat(args));
@@ -589,22 +633,34 @@ describe('Unit: CLI', function() {
 
         it('sets process.env.EMBER_VERBOSE_${NAME} for each space delimited option', function() {
           return verboseCommand(['fake_option_1', 'fake_option_2']).then(function() {
+            expect(false).to.be.true;
+          }).catch(function(error) {
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_1).to.be.ok;
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_2).to.be.ok;
+            expect(error.name).to.equal('SilentError');
+            expect(error.message).to.equal('The specified command fake-command is invalid. For available options, see `ember help`.');
           });
         });
 
         it('ignores verbose options after --', function() {
           return verboseCommand(['fake_option_1', '--fake-option', 'fake_option_2']).then(function() {
+            expect(false).to.be.true;
+          }).catch(function(error) {
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_1).to.be.ok;
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_2).to.not.be.ok;
+            expect(error.name).to.equal('SilentError');
+            expect(error.message).to.equal('The specified command fake-command is invalid. For available options, see `ember help`.');
           });
         });
 
         it('ignores verbose options after -', function() {
           return verboseCommand(['fake_option_1', '-f', 'fake_option_2']).then(function() {
+            expect(false).to.be.true;
+          }).catch(function(error) {
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_1).to.be.ok;
             expect(process.env.EMBER_VERBOSE_FAKE_OPTION_2).to.not.be.ok;
+            expect(error.name).to.equal('SilentError');
+            expect(error.message).to.equal('The specified command fake-command is invalid. For available options, see `ember help`.');
           });
         });
       });

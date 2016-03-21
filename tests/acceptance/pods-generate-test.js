@@ -19,7 +19,7 @@ var Blueprint        = require('../../lib/models/blueprint');
 var BlueprintNpmTask = require('ember-cli-internal-test-helpers/lib/helpers/disable-npm-on-blueprint');
 
 describe('Acceptance: ember generate pod', function() {
-  this.timeout(20000);
+  this.timeout(60000);
 
   var tmpdir;
 
@@ -41,8 +41,6 @@ describe('Acceptance: ember generate pod', function() {
   });
 
   afterEach(function() {
-    this.timeout(10000);
-
     process.chdir(root);
     return remove(tmproot);
   });
@@ -991,74 +989,6 @@ describe('Acceptance: ember generate pod', function() {
     });
   });
 
-  it('view foo --pod', function() {
-    return generate(['view', 'foo', '--pod']).then(function() {
-      assertFile('app/foo/view.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/foo/view-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo'"
-        ]
-      });
-    });
-  });
-
-  it('view foo --pod podModulePrefix', function() {
-    return generateWithPrefix(['view', 'foo', '--pod']).then(function() {
-      assertFile('app/pods/foo/view.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/pods/foo/view-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo'"
-        ]
-      });
-    });
-  });
-
-  it('view foo/bar --pod', function() {
-    return generate(['view', 'foo/bar', '--pod']).then(function() {
-      assertFile('app/foo/bar/view.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/foo/bar/view-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo/bar'"
-        ]
-      });
-    });
-  });
-
-  it('view foo/bar --pod podModulePrefix', function() {
-    return generateWithPrefix(['view', 'foo/bar', '--pod']).then(function() {
-      assertFile('app/pods/foo/bar/view.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/pods/foo/bar/view-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo/bar'"
-        ]
-      });
-    });
-  });
-
   it('resource foos --pod', function() {
     return generate(['resource', 'foos', '--pod']).then(function() {
       assertFile('app/router.js', {
@@ -1323,7 +1253,8 @@ describe('Acceptance: ember generate pod', function() {
     return generate(['adapter', 'application', '--base-class=application', '--pod']).then(function() {
       expect(false).to.be.ok;
     }, function(err) {
-      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
+      expect(err.name).to.equal('SilentError');
+      expect(err.message).to.match(/Adapters cannot extend from themself/);
     });
   });
 
@@ -1331,7 +1262,8 @@ describe('Acceptance: ember generate pod', function() {
     return generate(['adapter', 'foo', '--base-class=foo', '--pod']).then(function() {
       expect(false).to.be.ok;
     }, function(err) {
-      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
+      expect(err.name).to.equal('SilentError');
+      expect(err.message).to.match(/Adapters cannot extend from themself/);
     });
   });
 

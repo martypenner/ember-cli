@@ -8,13 +8,14 @@ var addonName  = 'some-cool-addon';
 var spawn      = require('child_process').spawn;
 var chalk      = require('chalk');
 var expect     = require('chai').expect;
+var EOL        = require('os').EOL;
 
 var symlinkOrCopySync   = require('symlink-or-copy').sync;
 var runCommand          = require('../helpers/run-command');
 var ember               = require('../helpers/ember');
 var copyFixtureFiles    = require('../helpers/copy-fixture-files');
 var killCliProcess      = require('../helpers/kill-cli-process');
-var assertDirEmpty      = require('../helpers/assert-dir-empty');
+var assertDirEmpty      = require('ember-cli-internal-test-helpers/lib/helpers/assert-dir-empty');
 var acceptance          = require('../helpers/acceptance');
 var createTestTargets   = acceptance.createTestTargets;
 var teardownTestTargets = acceptance.teardownTestTargets;
@@ -161,6 +162,19 @@ describe('Acceptance: addon-smoke-test', function() {
       })
       .then(function(result) {
         expect(result.exitCode).to.eql(0);
+      });
+  });
+
+  it('ember addon with linting errors', function() {
+    return copyFixtureFiles('addon/with-linting-errors')
+      .then(function() {
+        return ember(['test']);
+      })
+      .then(function() {
+        expect(false, 'should have rejected with a failed linter').to.be.ok;
+      })
+      .catch(function(result) {
+        expect(result.exitCode).to.not.eql(0);
       });
   });
 

@@ -87,11 +87,11 @@ module.exports = {
         },
         {
           name: 'output-path',
-          type: 'path',
           default: 'dist/',
           aliases: ['o'],
           key: 'outputPath',
-          required: false
+          required: false,
+          type: 'Path',
         },
         {
           name: 'watch',
@@ -103,6 +103,12 @@ module.exports = {
         {
           name: 'watcher',
           key: 'watcher',
+          required: false
+        },
+        {
+          name: 'suppress-sizes',
+          default: false,
+          key: 'suppressSizes',
           required: false
         }
       ],
@@ -611,20 +617,6 @@ module.exports = {
               availableOptions: [],
               anonymousOptions: ['name'],
               overridden: false
-            },
-            {
-              name: 'view',
-              description: 'Generates a view subclass.',
-              availableOptions: [],
-              anonymousOptions: ['name'],
-              overridden: false
-            },
-            {
-              name: 'view-test',
-              description: 'Generates a view unit test.',
-              availableOptions: [],
-              anonymousOptions: ['name'],
-              overridden: false
             }
           ]
         }
@@ -849,11 +841,11 @@ module.exports = {
         },
         {
           name: 'output-path',
-          type: 'path',
           default: 'dist/',
           aliases: ['op', 'out'],
           key: 'outputPath',
-          required: false
+          required: false,
+          type: 'Path',
         },
         {
           name: 'ssl',
@@ -875,6 +867,23 @@ module.exports = {
         }
       ],
       anonymousOptions: []
+    },
+    {
+      name: 'show-asset-sizes',
+      description: 'Show asset file sizes.',
+      works: 'insideProject',
+      aliases: [],
+      anonymousOptions: [],
+      availableOptions: [
+        {
+          name: 'output-path',
+          default: 'dist/',
+          key: 'outputPath',
+          required: false,
+          aliases: ['o'],
+          type: 'Path'
+        }
+      ]
     },
     {
       name: 'test',
@@ -968,7 +977,8 @@ module.exports = {
           name: 'path',
           description: 'Reuse an existing build at given path.',
           key: 'path',
-          required: false
+          required: false,
+          type: 'Path',
         },
         {
           name: 'query',

@@ -463,40 +463,6 @@ describe('Acceptance: ember generate', function() {
     });
   });
 
-  it('view foo', function() {
-    return generate(['view', 'foo']).then(function() {
-      assertFile('app/views/foo.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/views/foo-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo'"
-        ]
-      });
-    });
-  });
-
-  it('view foo/bar', function() {
-    return generate(['view', 'foo/bar']).then(function() {
-      assertFile('app/views/foo/bar.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('tests/unit/views/foo/bar-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo/bar'"
-        ]
-      });
-    });
-  });
-
   it('resource foos', function() {
     return generate(['resource', 'foos']).then(function() {
       assertFile('app/router.js', {
@@ -520,11 +486,12 @@ describe('Acceptance: ember generate', function() {
     });
   });
 
-  it('resource without entity name does not throw exception', function() {
+  it('resource without entity name does throw a warning', function() {
     return generate(['resource']).then(function() {
       expect(false).to.be.ok;
     }, function(err) {
-      expect(err.errorLog[0].message).to.equal('The `ember generate <entity-name>` command requires an entity name to be specified. For more details, use `ember help`.');
+      expect(err.name).to.equal('SilentError');
+      expect(err.message).to.equal('The `ember generate <entity-name>` command requires an entity name to be specified. For more details, use `ember help`.');
     });
   });
 
@@ -755,7 +722,8 @@ describe('Acceptance: ember generate', function() {
     return generate(['adapter', 'application', '--base-class=application']).then(function() {
       expect(false).to.be.ok;
     }, function(err) {
-      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
+      expect(err.name).to.equal('SilentError');
+      expect(err.message).to.match(/Adapters cannot extend from themself/);
     });
   });
 
@@ -763,7 +731,8 @@ describe('Acceptance: ember generate', function() {
     return generate(['adapter', 'foo', '--base-class=foo']).then(function() {
       expect(false).to.be.ok;
     }, function(err) {
-      expect(err.errorLog[0]).to.match(/Adapters cannot extend from themself/);
+      expect(err.name).to.equal('SilentError');
+      expect(err.message).to.match(/Adapters cannot extend from themself/);
     });
   });
 

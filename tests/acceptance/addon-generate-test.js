@@ -439,50 +439,6 @@ describe('Acceptance: ember generate in-addon', function() {
     });
   });
 
-  it('in-addon view foo', function() {
-    return generateInAddon(['view', 'foo']).then(function() {
-      assertFile('addon/views/foo.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('app/views/foo.js', {
-        contains: [
-          "export { default } from 'my-addon/views/foo';"
-        ]
-      });
-      assertFile('tests/unit/views/foo-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo'"
-        ]
-      });
-    });
-  });
-
-  it('in-addon view foo/bar', function() {
-    return generateInAddon(['view', 'foo/bar']).then(function() {
-      assertFile('addon/views/foo/bar.js', {
-        contains: [
-          "import Ember from 'ember';",
-          "export default Ember.View.extend({\n})"
-        ]
-      });
-      assertFile('app/views/foo/bar.js', {
-        contains: [
-          "export { default } from 'my-addon/views/foo/bar';"
-        ]
-      });
-      assertFile('tests/unit/views/foo/bar-test.js', {
-        contains: [
-          "import { moduleFor, test } from 'ember-qunit';",
-          "moduleFor('view:foo/bar'"
-        ]
-      });
-    });
-  });
-
   it('in-addon resource foos', function() {
     return generateInAddon(['resource', 'foos']).catch(function(error) {
       expect(error.message).to.include('blueprint does not support ' +
@@ -875,7 +831,8 @@ describe('Acceptance: ember generate in-addon', function() {
 
   it('in-addon addon-import cannot be called directly', function() {
     return generateInAddon(['addon-import', 'foo']).catch(function(error) {
-      expect(error.errorLog[0].message).to.contain('You cannot call the addon-import blueprint directly.');
+      expect(error.name).to.equal('SilentError');
+      expect(error.message).to.equal('You cannot call the addon-import blueprint directly.');
     });
   });
 
